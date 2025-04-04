@@ -1,15 +1,23 @@
 pipeline {
   agent any
   stages {
-    stage('Build') {
-      steps {
-        git(credentialsId: 'f4708822-3927-49ed-a7c7-99f3573cb18f', branch: 'integration', url: 'https://github.com/varun921-tech/demo-java-project.git')
-      }
-    }
+    stage('Checkout and Build') {
+      parallel {
+        stage('Build') {
+          steps {
+            git(credentialsId: 'f4708822-3927-49ed-a7c7-99f3573cb18f', branch: 'integration', url: 'https://github.com/varun921-tech/demo-java-project.git')
+          }
+        }
 
-    stage('Compile') {
-      steps {
-        sh 'mvn compile'
+        stage('Compile') {
+          steps {
+            withMaven(maven: 'maven3.8.7') {
+              sh 'mvn compile'
+            }
+
+          }
+        }
+
       }
     }
 
@@ -33,7 +41,7 @@ pipeline {
           }
         }
 
-        stage('') {
+        stage('error') {
           steps {
             archiveArtifacts '**/*.war'
           }
